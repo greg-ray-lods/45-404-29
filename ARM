@@ -1,0 +1,106 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "administratorLogin": {
+            "type": "string"
+        },
+        "administratorSID": {
+            "type": "string"
+        },
+        "tenantId": {
+            "type": "string"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "apiVersion": "2021-05-01-preview",
+            "type": "Microsoft.Sql/servers",
+            "location": "eastus",
+            "tags": {},
+            "name": "sql48486547",
+            "properties": {
+                "version": "12.0",
+                "minimalTlsVersion": "1.2",
+                "publicNetworkAccess": "Enabled",
+                "administrators": {
+                    "administratorType": "activeDirectory",
+                    "login": "[parameters('administratorLogin')]",
+                    "sid": "[parameters('administratorSID')]",
+                    "tenantId": "[parameters('tenantId')]",
+                    "azureADOnlyAuthentication": true,
+                    "principalType": "User"
+                },
+                "primaryUserAssignedIdentityId": "",
+                "federatedClientId": "",
+                "servicePrincipal": {
+                    "type": "None"
+                }
+            },
+            "resources": [
+                {
+                    "apiVersion": "2022-08-01-preview",
+                    "dependsOn": [
+                        "[concat('Microsoft.Sql/servers/', 'sql48486547')]"
+                    ],
+                    "location": "eastus",
+                    "tags": {},
+                    "name": "freeDB",
+                    "properties": {
+                        "collation": "SQL_Latin1_General_CP1_CI_AS",
+                        "maxSizeBytes": 34359738368,
+                        "sampleName": "AdventureWorksLT",
+                        "zoneRedundant": false,
+                        "licenseType": "",
+                        "readScale": "Disabled",
+                        "highAvailabilityReplicaCount": 0,
+                        "minCapacity": "0.5",
+                        "autoPauseDelay": 60,
+                        "requestedBackupStorageRedundancy": "Local",
+                        "isLedgerOn": false,
+                        "availabilityZone": null,
+                        "useFreeLimit": false,
+                        "freeLimitExhaustionBehavior": "AutoPause"
+                    },
+                    "sku": {
+                        "name": "GP_S_Gen5_1",
+                        "tier": "GeneralPurpose"
+                    },
+                    "type": "databases"
+                },
+                {
+                    "condition": true,
+                    "apiVersion": "2021-11-01",
+                    "dependsOn": [
+                        "[concat('Microsoft.Sql/servers/', 'sql48486547')]"
+                    ],
+                    "location": "eastus",
+                    "name": "AllowAllWindowsAzureIps",
+                    "properties": {
+                        "endIpAddress": "255.255.255.255",
+                        "startIpAddress": "0.0.0.0"
+                    },
+                    "type": "firewallrules"
+                },
+                {
+                    "condition": true,
+                    "apiVersion": "2021-11-01",
+                    "dependsOn": [
+                        "[concat('Microsoft.Sql/servers/', 'sql48486547')]"
+                    ],
+                    "location": "eastus",
+                    "name": "ClientIp-2025-2-18_14-14-33",
+                    "properties": {
+                        "endIpAddress": "255.255.255.255",
+                        "startIpAddress": "0.0.0.0"
+                    },
+                    "type": "firewallrules"
+                }
+            ],
+            "identity": {
+                "type": "None"
+            }
+        }
+    ]
+}
